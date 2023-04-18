@@ -99,7 +99,7 @@ func (this *RaftNode) broadcastHeartbeats() {
 					return
 				}
 
-				if this.state == "Leader" && termWhenHeartbeatSent == reply.Term && aeType == "AppendEntries" {
+				if this.state == "Leader" && termWhenHeartbeatSent == reply.Term {
 					if reply.Success {
 						// There's changes you need to make here.
 						// this.nextIndex for the received PEER (this.nextIndex[peerId]) needs to be updated.
@@ -109,7 +109,8 @@ func (this *RaftNode) broadcastHeartbeats() {
 						// TODO
 						//-------------------------------------------------------------------------------------------/
 						this.nextIndex[peerId] += len(entries)
-						this.matchIndex[peerId] = this.nextIndex[peerId] - 1
+						// this.matchIndex[peerId] = this.nextIndex[peerId] - 1
+						this.matchIndex[peerId] = this.nextIndex[peerId] - len(entries)
 
 						if (aeType == "Heartbeat" && LogHeartbeatMessages) || aeType == "AppendEntries" {
 							this.write_log("%s reply from NODE %d success: nextIndex := %v, matchIndex := %v", aeType, peerId, this.nextIndex, this.matchIndex)
@@ -154,7 +155,7 @@ func (this *RaftNode) broadcastHeartbeats() {
 						//-------------------------------------------------------------------------------------------/
 						// TODO
 						//-------------------------------------------------------------------------------------------/
-						this.nextIndex[peerId] = currentPeer_nextIndex - 1
+						this.nextIndex[peerId] = currentPeer_nextIndex - len(entries)
 						if (aeType == "Heartbeat" && LogHeartbeatMessages) || aeType == "AppendEntries" {
 							this.write_log("%s reply from NODE %d was failure; Hence, decrementing its nextIndex", aeType, peerId)
 						}
